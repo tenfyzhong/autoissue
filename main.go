@@ -27,6 +27,38 @@ func subtraction(lhs, rhs []string) []string {
 	return results
 }
 
+// 返回比issueLabel最新的新，而且不在issueLabel的数据
+func recentUnpostIssueLabelName(sitemapLabel, issueLabel []string) []string {
+	if len(issueLabel) == 0 {
+		return sitemapLabel
+	}
+
+	oldest := ""
+	// sortedIssueLabel := sort.Sort(sort.Reverse(issueLabel))
+	for _, label := range issueLabel {
+		// `/2018/11/15` 长度为11
+		if len(label) < 11 {
+			continue
+		}
+		if oldest == "" || label[:11] < oldest {
+			oldest = label[:11]
+		}
+	}
+
+	// 最近的label，时间>=oldest的
+	recentLabel := make([]string, 0, len(sitemapLabel))
+	for _, label := range sitemapLabel {
+		if len(label) < 11 {
+			continue
+		}
+		if label[:11] > oldest {
+			recentLabel = append(recentLabel, label)
+		}
+	}
+
+	return subtraction(recentLabel, issueLabel)
+}
+
 func postIssue(owner, repo, token, domain, root, labelName string, labels []string) error {
 	indexPath := path.Join(root, "public", labelName, "index.html")
 	title, err := PostPathToTitle(indexPath)
@@ -89,7 +121,7 @@ func main() {
 
 	sitemapLabelNames := SitemapToURLLabelName(sitemap, config.URL)
 
-	needInitLabelNames := subtraction(sitemapLabelNames, issueLabelNames)
+	needInitLabelNames := recentUnpostIssueLabelName(sitemapLabelNames, issueLabelNames)
 	for _, name := range needInitLabelNames {
 		postIssue(config.Owner, config.CommentRepo, token, config.URL, *root, name, config.Labels)
 	}
