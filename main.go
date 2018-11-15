@@ -112,7 +112,7 @@ func main() {
 	}
 	issueLabelNames := IssueToURLLabelName(issues, config.Labels)
 
-	sitemapPath := path.Join(*root, "public", "sitemap.xml")
+	sitemapPath := path.Join(*root, "public", config.Sitemap.Path)
 	sitemap, err := ParseSitemap(sitemapPath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "parse sitemap %v\n", err)
